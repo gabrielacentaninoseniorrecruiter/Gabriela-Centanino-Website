@@ -69,7 +69,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ initialService }
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/.netlify/functions/send-email', {
+      const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

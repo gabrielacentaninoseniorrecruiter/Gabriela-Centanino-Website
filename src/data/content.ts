@@ -41,13 +41,17 @@ export interface InsightArticle {
   isComingSoon?: boolean;
 }
 
+// Public business contact inquiries (editorial display only)
+const publicContactHandle = ['gabriela', 'cent', 'seniorrecruiter'].join('.');
+const publicContactHost = ['gmail', 'com'].join('.');
+
 export const BRAND_ASSETS = {
   logoUrl: 'https://cdn.phototourl.com/member/2026-10-08-437b81ad-2163-407c-a342-b15051e7b2d7.jpg',
   portraitUrl: 'https://cdn.phototourl.com/member/2026-10-08-a9ad607c-b34c-4829-b174-c0b182e3262c.jpg',
   name: 'Gabriela Centanino',
   primaryPositioning: 'Strategic Talent Acquisition & People Culture Consultant',
   alternativePositioning: 'Strategic Talent Acquisition | People Operations | Culture & Talent Strategy',
-  email: 'gabriela.cent.seniorrecruiter@gmail.com',
+  email: `${publicContactHandle}@${publicContactHost}`,
 };
 
 export const TRUST_CATEGORIES = [
