@@ -1,0 +1,16 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+# Route API contact requests to the Netlify serverless function
+[[redirects]]
+  from = "/api/contact"
+  to = "/.netlify/functions/send-email"
+  status = 200
+
+# Single Page Application routing fallback
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

@@ -14,15 +14,18 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// API route for Contact Form with SMTP
-app.post('/api/contact', async (req, res) => {
+// API route for Contact Form with SMTP (supports Netlify function endpoint and /api/contact)
+const handleEmailRequest = async (req: express.Request, res: express.Response) => {
   try {
     const result = await sendContactEmail(req.body);
     res.status(result.success ? 200 : 500).json(result);
   } catch (err: any) {
     res.status(400).json({ success: false, error: err?.message || 'Server error' });
   }
-});
+};
+
+app.post('/api/contact', handleEmailRequest);
+app.post('/.netlify/functions/send-email', handleEmailRequest);
 
 // Serve production static assets
 const distPath = path.resolve(__dirname, 'dist');

@@ -1,14 +1,18 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import {defineConfig, Plugin} from 'vite';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 function contactApiPlugin(): Plugin {
   return {
     name: 'api-contact-handler',
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
-        if (req.url === '/api/contact' && req.method === 'POST') {
+        if ((req.url === '/.netlify/functions/send-email' || req.url === '/api/contact') && req.method === 'POST') {
           let body = '';
           req.on('data', (chunk) => {
             body += chunk;

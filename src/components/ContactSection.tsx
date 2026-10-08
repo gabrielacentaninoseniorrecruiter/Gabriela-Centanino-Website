@@ -69,7 +69,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ initialService }
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/contact', {
+      const response = await fetch('/.netlify/functions/send-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -77,10 +77,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ initialService }
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
       if (!response.ok || data.success === false) {
-        throw new Error(data.error || data.message || 'Unable to send message via SMTP server.');
+        throw new Error(data.error || 'Unable to send message at this time.');
       }
 
       setIsSuccess(true);
@@ -96,7 +96,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ initialService }
       console.error('Submission failed:', err);
       setErrorMessage(
         err?.message ||
-          'Server transmission error. You may also email Gabriela directly at gabriela.cent.seniorrecruiter@gmail.com.'
+          'Unable to send your message at this time. Please try again or reach out directly.'
       );
     } finally {
       setIsSubmitting(false);

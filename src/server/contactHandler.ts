@@ -16,13 +16,34 @@ export async function sendContactEmail(payload: ContactPayload): Promise<{
 }> {
   const { name, email, company, helpType, message } = payload;
 
-  const targetRecipient = process.env.RECIPIENT_EMAIL || 'gabriela.cent.seniorrecruiter@gmail.com';
+  if (!name || !email || !helpType || !message) {
+    return {
+      success: false,
+      smtpConfigured: false,
+      message: 'All required fields must be provided.',
+      error: 'Missing required fields',
+    };
+  }
+
+  const targetRecipient = process.env.RECIPIENT_EMAIL;
   const smtpUser = process.env.SMTP_USER;
   const smtpPass = process.env.SMTP_PASS;
-  const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
-  const smtpPort = Number(process.env.SMTP_PORT) || 465;
-  const smtpSecure = process.env.SMTP_SECURE === 'true' || smtpPort === 465;
-  const smtpFrom = process.env.SMTP_FROM || `"Gabriela Centanino Website" <${smtpUser || targetRecipient}>`;
+  const smtpHost = process.env.SMTP_HOST;
+  const smtpPortRaw = process.env.SMTP_PORT;
+  const smtpSecureRaw = process.env.SMTP_SECURE;
+  const smtpFrom = process.env.SMTP_FROM;
+
+  if (!smtpHost || !smtpUser || !smtpPass || !smtpFrom || !targetRecipient) {
+    return {
+      success: false,
+      smtpConfigured: false,
+      message: 'Server configuration error: missing required environment variables.',
+      error: 'Incomplete SMTP configuration',
+    };
+  }
+
+  const smtpPort = smtpPortRaw ? parseInt(smtpPortRaw, 10) : 465;
+  const smtpSecure = smtpSecureRaw !== undefined ? smtpSecureRaw === 'true' : smtpPort === 465;
 
   // HTML template for executive-level presentation
   const htmlBody = `
@@ -100,21 +121,6 @@ Reply directly to: ${email}
 Received: ${new Date().toUTCString()}
   `;
 
-  // Check if SMTP credentials are provided
-  if (!smtpUser || !smtpPass) {
-    console.warn(
-      '[SMTP WARNING] SMTP_USER or SMTP_PASS environment variables are not set in .env. Form inquiry was logged successfully to server console.',
-      { name, email, company, helpType, targetRecipient }
-    );
-
-    return {
-      success: true,
-      smtpConfigured: false,
-      message:
-        'Inquiry logged. (Note: To dispatch via live SMTP, configure SMTP_USER and SMTP_PASS in .env or cloud environment secrets).',
-    };
-  }
-
   try {
     const transporter = nodemailer.createTransport({
       host: smtpHost,
@@ -126,7 +132,7 @@ Received: ${new Date().toUTCString()}
       },
     });
 
-    const info = await transporter.sendMail({
+    await transporter.sendMail({
       from: smtpFrom,
       to: targetRecipient,
       replyTo: `"${name}" <${email}>`,
@@ -135,20 +141,18 @@ Received: ${new Date().toUTCString()}
       html: htmlBody,
     });
 
-    console.log('[SMTP SUCCESS] Email delivered successfully to', targetRecipient, 'MessageId:', info.messageId);
-
     return {
       success: true,
       smtpConfigured: true,
       message: 'Your inquiry has been sent directly to Gabriela Centanino via secure email.',
     };
   } catch (error: any) {
-    console.error('[SMTP ERROR] Failed to send email via SMTP:', error);
+    console.error('Failed to send email via SMTP.');
     return {
       success: false,
       smtpConfigured: true,
       message: 'Failed to send message via SMTP server.',
-      error: error?.message || 'SMTP delivery error',
+      error: 'Delivery error',
     };
   }
 }
